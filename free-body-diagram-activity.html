@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Free-Body Diagram Lab</title>
+<style>
+:root{--ink:#1d2340;--fg:#ef476f;--n:#118ab2;--fa:#06b57f;--ff:#ff9f1c;--t:#8338ec}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{font-family:"Trebuchet MS","Segoe UI",system-ui,-apple-system,Roboto,sans-serif;color:var(--ink);
+  background:linear-gradient(135deg,#ffd6e8 0%,#c9f0ff 35%,#d6ffe3 68%,#fff3c4 100%);background-attachment:fixed;
+  -webkit-text-size-adjust:100%}
+button{font:inherit;cursor:pointer;touch-action:manipulation;border:0}
+[hidden]{display:none!important}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 16px;
+  background:linear-gradient(90deg,#7b2ff7,#f107a3 55%,#ff9f1c);color:#fff;position:sticky;top:0;z-index:20;box-shadow:0 4px 14px #0003}
+.logo{font-weight:900;font-size:clamp(18px,3vw,26px);letter-spacing:.3px;flex:1;min-width:210px;text-shadow:0 2px 0 #0003}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:6px 12px;border-radius:99px;font-weight:800;font-size:14px;background:#fff;color:var(--ink)}
+.chip.c1{background:#ffe066}.chip.c2{background:#9bf6ff}.chip.c3{background:#caffbf}
+.icon{width:44px;height:44px;border-radius:50%;background:#fff;font-size:22px;box-shadow:0 3px 0 #0003}
+main{max-width:1040px;margin:0 auto;padding:16px 14px 40px}
+.card{background:#ffffffee;border-radius:22px;padding:18px 20px;box-shadow:0 8px 24px #1d234022;margin-bottom:14px;border:3px solid #fff}
+h1{margin:0 0 6px;font-size:clamp(26px,5vw,40px)}
+h2{margin:8px 0 4px;font-size:clamp(18px,2.6vw,24px)}
+.help{margin:4px 0 0;color:#46507a;font-size:15px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+.tile{border-radius:18px;padding:12px 14px;color:#fff;font-weight:700}
+.tile b{display:block;font-size:18px;margin-bottom:4px}
+.t1{background:linear-gradient(135deg,#ff6b6b,#ffa94d)}.t2{background:linear-gradient(135deg,#4dabf7,#7950f2)}.t3{background:linear-gradient(135deg,#12b886,#94d82d)}
+input[type=text]{font:inherit;font-size:18px;padding:12px 14px;border-radius:14px;border:3px solid #b197fc;width:100%;max-width:420px;background:#fff;color:var(--ink)}
+.big{font-size:20px;font-weight:900;padding:14px 28px;border-radius:18px;color:#fff;box-shadow:0 5px 0 #0003;min-height:52px}
+.big:active{transform:translateY(3px);box-shadow:0 2px 0 #0003}
+.go{background:linear-gradient(135deg,#12b886,#40c057)}
+.next{background:linear-gradient(135deg,#7950f2,#e64980)}
+.alt{background:linear-gradient(135deg,#339af0,#22b8cf)}
+.actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:8px 0}
+.qtop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.badge{background:linear-gradient(90deg,#7950f2,#e64980);color:#fff;font-weight:800;border-radius:99px;padding:5px 14px;font-size:14px}
+.bar{height:12px;background:#e9ecef;border-radius:99px;overflow:hidden;margin:10px 0}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff6b6b,#ffd43b,#51cf66,#339af0);transition:width .4s}
+.stage{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:900px){.stage{grid-template-columns:1.45fr 1fr;align-items:start}}
+#svg{width:100%;height:auto;display:block;border-radius:16px;border:3px solid #cbd5ff;background:#eaf7ff;touch-action:none;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:crosshair}
+.tools h3{margin:0 0 8px;font-size:17px}
+.pal{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.fbtn{position:relative;background:var(--c);color:#fff;border-radius:16px;padding:10px 12px;text-align:left;min-height:56px;
+  box-shadow:0 4px 0 #0003;outline:4px solid transparent;transition:transform .1s}
+.fbtn b{font-size:20px;display:block}.fbtn small{display:block;font-size:12px;opacity:.95;font-weight:700}
+.fbtn kbd{position:absolute;right:8px;top:6px;background:#fff4;border-radius:6px;padding:0 6px;font-size:12px;font-weight:800}
+.fbtn.sel{outline-color:var(--ink);transform:translateY(-2px) scale(1.03)}
+.fbtn .ck{position:absolute;right:8px;bottom:6px;font-size:16px}
+.mini{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.mini button{background:#fff;border:3px solid #b197fc;border-radius:12px;padding:8px 12px;font-weight:800;min-height:44px;color:var(--ink)}
+.kbhint{font-size:13px;color:#46507a;margin-top:10px;line-height:1.45}
+.locked .fbtn,.locked .mini button{opacity:.45;pointer-events:none}
+.eqrow{margin:6px 0 10px}
+.eqrow label{font-weight:800;display:block;margin-bottom:6px}
+#eq{max-width:none;font-size:24px;font-weight:800;letter-spacing:1px;text-align:center}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tiles button{min-width:54px;min-height:50px;border-radius:14px;font-weight:900;font-size:20px;padding:6px 14px;color:#fff;box-shadow:0 4px 0 #0003}
+.tiles .op{background:#495057}.tiles .ctl{background:#e03131}
+.fb{border-left:10px solid #51cf66}
+.fb.bad{border-left-color:#ff6b6b}.fb.mid{border-left-color:#ffa94d}
+.fb h3{margin:0 0 6px;font-size:22px}
+.fb ul{margin:6px 0 0;padding-left:0;list-style:none}.fb li{margin:4px 0;font-weight:700}
+.fbwrap{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:760px){.fbwrap.two{grid-template-columns:1.1fr 1fr}}
+.fbwrap svg{width:100%;height:auto;border-radius:12px;border:2px solid #cbd5ff}
+.cap{font-size:13px;font-weight:800;color:#46507a;margin-bottom:4px}
+.score{font-size:64px;font-weight:900;margin:6px 0;background:linear-gradient(90deg,#f107a3,#7b2ff7,#12b886);-webkit-background-clip:text;background-clip:text;color:transparent}
+.center{text-align:center}
+.rev{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:8px;text-align:left;margin-top:12px}
+.rev div{background:#f1f3ff;border-radius:12px;padding:8px 12px;font-weight:700;font-size:14px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,40px);background:#1d2340;color:#fff;padding:12px 20px;border-radius:99px;font-weight:800;opacity:0;transition:.25s;z-index:40;pointer-events:none;max-width:92vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:50;display:none}
+.shake{animation:sh .4s}
+@keyframes sh{0%,100%{transform:none}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo">🧲 Free-Body Diagram Lab</div>
+  <div class="chips">
+    <span class="chip c1" id="chip1">Part 1: 0/10</span>
+    <span class="chip c2" id="chip2">Part 2: 0/20</span>
+    <span class="chip c3" id="chipT">Total: 0/30</span>
+  </div>
+  <button id="muteBtn" class="icon" aria-label="Turn sound on or off">🔊</button>
+</header>
+
+<main>
+  <!-- WELCOME -->
+  <section id="welcome" class="screen card">
+    <h1>🚀 Free-Body Diagram Lab</h1>
+    <p class="help">A free-body diagram (force diagram) shows every force acting on one object as arrows. In this lab, forces point only <b>up, down, left or right</b> — no diagonals!</p>
+    <div class="grid3">
+      <div class="tile t1"><b>Part 1 · Draw it (10 pts)</b>Read the condition of the object, then draw its free-body diagram. 5 questions × 2 pts.</div>
+      <div class="tile t2"><b>Part 2 · Write it (20 pts)</b>Look at a given free-body diagram and write a simple equation for the forces on one axis. 10 questions × 2 pts.</div>
+      <div class="tile t3"><b>Use any input</b>Mouse, pen, touch screen or keyboard. Sounds and a read-aloud button (🗣) are on — use 🔊 to mute.</div>
+    </div>
+    <p class="help">Rules for this lab: g = 10 m/s². Right (+x) and up (+y) are positive. Forces: <b>Fg</b> gravity, <b>N</b> normal, <b>Fa</b> applied push/pull, <b>Ff</b> friction, <b>T</b> tension.</p>
+    <p style="margin:14px 0 6px;font-weight:800">Your name:</p>
+    <input type="text" id="nameIn" placeholder="Type your name" maxlength="30" autocomplete="off" autocapitalize="words">
+    <div class="actions" style="justify-content:flex-start;margin-top:16px"><button class="big go" id="startBtn">Start Part 1 ▶</button></div>
+  </section>
+
+  <!-- PLAY -->
+  <section id="play" class="screen" hidden>
+    <div class="card">
+      <div class="qtop"><span class="badge" id="qLabel"></span><button class="icon" id="speakBtn" aria-label="Read the question aloud">🗣</button></div>
+      <div class="bar"><i id="barFill"></i></div>
+      <h2 id="qText"></h2>
+      <p class="help" id="qHelp"></p>
+    </div>
+    <div class="card stage">
+      <svg id="svg" viewBox="0 0 640 420" role="img" aria-label="Diagram of the object"></svg>
+      <div class="tools">
+        <div id="p1tools">
+          <h3>1) Pick a force 2) Drag from the center of the object</h3>
+          <div class="pal" id="pal"></div>
+          <div class="mini">
+            <button id="undoBtn">↩ Undo</button>
+            <button id="delBtn">🗑 Remove selected</button>
+            <button id="clrBtn">🧹 Clear all</button>
+          </div>
+          <div class="kbhint">⌨ Keyboard: <b>1–5</b> pick a force · <b>arrow keys</b> draw (press again to make it longer, <b>Shift</b>+arrow shorter) · <b>Delete</b> removes · <b>Enter</b> checks. Arrow length follows the scale bar: 15 px = 5 N.</div>
+        </div>
+        <div id="p2tools" hidden>
+          <div class="eqrow">
+            <label for="eq" id="eqLabel">Equation</label>
+            <input type="text" id="eq" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Build your equation here…">
+          </div>
+          <div class="help">Tap the tiles (or type with the keyboard). Use <b>0</b> when forces are balanced and <b>ma</b> when the object is speeding up.</div>
+          <div class="tiles" id="tiles"></div>
+        </div>
+      </div>
+    </div>
+    <div id="fb" class="card fb" hidden></div>
+    <div class="actions">
+      <button class="big go" id="checkBtn">Check ✔</button>
+      <button class="big next" id="nextBtn" hidden>Next ➜</button>
+    </div>
+  </section>
+
+  <!-- INTERLUDE -->
+  <section id="interlude" class="screen card center" hidden>
+    <h1>🎉 Part 1 complete!</h1>
+    <div class="score" id="p1score"></div>
+    <p class="help">Now you will be given a finished free-body diagram. Write the equation for the forces on the x-axis or y-axis.</p>
+    <div class="actions"><button class="big next" id="startP2">Start Part 2 ▶</button></div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="screen card center" hidden>
+    <h1 id="resTitle"></h1>
+    <div class="score" id="resScore"></div>
+    <p class="help" id="resMsg"></p>
+    <div class="rev" id="rev"></div>
+    <div class="actions" style="margin-top:16px"><button class="big alt" id="againBtn">🔄 Play again (new questions)</button></div>
+  </section>
+</main>
+<div id="toast"></div>
+<canvas id="confetti"></canvas>
+
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+const FORCES={
+  Fg:{name:'Gravity (weight)',color:'#ef476f'},
+  N:{name:'Normal force',color:'#118ab2'},
+  Fa:{name:'Applied push/pull',color:'#06b57f'},
+  Ff:{name:'Friction',color:'#ff9f1c'},
+  T:{name:'Tension (rope)',color:'#8338ec'}
+};
+const ORDER=['Fg','N','Fa','Ff','T'];
+const DIRS={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]};
+const ARROW={U:'↑',D:'↓',L:'←',R:'→'};
+const PX=3, MAXLEN=165, STEP=15, CX=320, CY=210;
+const OBJ={book:{hh:22,hw:40},box:{hh:34,hw:34},crate:{hh:34,hw:34},ball:{hh:30,hw:30},lamp:{hh:34,hw:26},puck:{hh:15,hw:45}};
+
+const EQY={m:{N:1,Fg:-1},show:'N − Fg = 0',why:'There is no up/down acceleration, so the upward force N equals the downward force Fg.'};
+const SC=[
+ {id:'book',obj:'book',scene:'table',title:'Book on a table',
+  text:'A 2 kg book rests on a table.',
+  f:[['Fg','D',20],['N','U',20]],
+  why:'The book is at rest, so the forces are balanced: the table pushes up (N) as hard as gravity pulls down (Fg).',
+  eq:{y:EQY}},
+ {id:'pushcv',obj:'crate',scene:'floor',title:'Crate pushed at constant velocity',
+  text:'A 4 kg crate is pushed to the right with 20 N along a rough floor. It moves at constant velocity.',
+  f:[['Fg','D',40],['N','U',40],['Fa','R',20],['Ff','L',20]],
+  why:'Constant velocity means zero net force: friction (Ff) balances the push (Fa), and N balances Fg.',
+  eq:{x:{m:{Fa:1,Ff:-1},show:'Fa − Ff = 0',why:'Constant velocity means the horizontal forces are balanced.'},y:EQY}},
+ {id:'pushacc',obj:'box',scene:'floor',title:'Box speeding up',
+  text:'A 3 kg box is pushed to the right with 30 N on a rough floor. Friction is 10 N. The box speeds up to the right.',
+  f:[['Fg','D',30],['N','U',30],['Fa','R',30],['Ff','L',10]],
+  why:'The push is bigger than friction, so there is a net force to the right (the arrow for Fa is longer than Ff).',
+  eq:{x:{m:{Fa:1,Ff:-1,ma:-1},show:'Fa − Ff = ma',why:'The box accelerates, so the net force is ma (not 0).'},y:EQY}},
+ {id:'lamp',obj:'lamp',scene:'ceiling',title:'Hanging lamp',
+  text:'A 2 kg lamp hangs at rest from the ceiling by a cord.',
+  f:[['Fg','D',20],['T','U',20]],
+  why:'The lamp is at rest, so the cord pulls up (T) with the same size as gravity pulls down (Fg).',
+  eq:{y:{m:{T:1,Fg:-1},show:'T − Fg = 0',why:'At rest, the tension equals the weight.'}}},
+ {id:'pullleft',obj:'crate',scene:'floor',rope:'L',title:'Crate pulled left',
+  text:'A 5 kg crate is pulled to the left by a rope with 25 N along a rough floor. It moves at constant velocity.',
+  f:[['Fg','D',50],['N','U',50],['T','L',25],['Ff','R',25]],
+  why:'Constant velocity: friction (to the right) balances the rope tension (to the left).',
+  eq:{x:{m:{Ff:1,T:-1},show:'Ff − T = 0',why:'Right is positive, so Ff is + and T is −. The net force is zero.'},y:EQY}},
+ {id:'liftacc',obj:'crate',scene:'rope',title:'Crate speeding up while lifted',
+  text:'A 2 kg crate is lifted upward by a cable with 30 N. The crate speeds up.',
+  f:[['Fg','D',20],['T','U',30]],
+  why:'The cable pulls up harder than gravity pulls down, so the T arrow is longer than the Fg arrow.',
+  eq:{y:{m:{T:1,Fg:-1,ma:-1},show:'T − Fg = ma',why:'Up is positive. The crate accelerates upward, so the net force is ma.'}}},
+ {id:'freefall',obj:'ball',scene:'air',title:'Falling ball',
+  text:'A 2 kg ball falls through the air. Ignore air resistance.',
+  f:[['Fg','D',20]],
+  why:'Ignoring air resistance, only gravity acts on the ball: one force, Fg, pointing down.'},
+ {id:'static',obj:'box',scene:'floor',title:'Box that does not move',
+  text:'A 3 kg box is pushed to the right with 10 N, but it does not move.',
+  f:[['Fg','D',30],['N','U',30],['Fa','R',10],['Ff','L',10]],
+  why:'The box stays at rest, so friction (Ff) is exactly as big as the push (Fa).',
+  eq:{x:{m:{Fa:1,Ff:-1},show:'Fa − Ff = 0',why:'The box is at rest, so the horizontal forces are balanced.'},y:EQY}},
+ {id:'press',obj:'book',scene:'table',title:'Book pressed down',
+  text:'A 2 kg book rests on a table while a hand pushes straight down on it with 10 N. The book does not move.',
+  f:[['Fg','D',20],['Fa','D',10],['N','U',30]],
+  why:'Two forces point down (Fg and Fa), so the table must push up with both of them: N is the longest arrow.',
+  eq:{y:{m:{N:1,Fg:-1,Fa:-1},show:'N − Fg − Fa = 0',why:'Up is positive. N is + and both downward forces are −. The sum is zero.'}}},
+ {id:'liftcv',obj:'crate',scene:'rope',title:'Crate lifted at constant velocity',
+  text:'A 5 kg crate is lifted upward by a rope at constant velocity.',
+  f:[['Fg','D',50],['T','U',50]],
+  why:'Constant velocity means zero net force, so T equals Fg.',
+  eq:{y:{m:{T:1,Fg:-1},show:'T − Fg = 0',why:'Constant velocity: the forces are balanced.'}}},
+ {id:'pullacc',obj:'box',scene:'floor',rope:'R',title:'Box pulled and speeding up',
+  text:'A 2 kg box is pulled to the right by a rope with 16 N. Friction is 4 N. The box speeds up.',
+  f:[['Fg','D',20],['N','U',20],['T','R',16],['Ff','L',4]],
+  why:'The rope pulls harder than friction, so there is a net force to the right.',
+  eq:{x:{m:{T:1,Ff:-1,ma:-1},show:'T − Ff = ma',why:'The box accelerates to the right, so the net force is ma.'},y:EQY}},
+ {id:'ice',obj:'puck',scene:'ice',title:'Puck on ice',
+  text:'A 1 kg hockey puck glides to the right at constant velocity on frictionless ice.',
+  f:[['Fg','D',10],['N','U',10]],
+  why:'There is no friction and no push, so there are no horizontal forces. Moving at constant velocity does not need a force!',
+  eq:{y:EQY}}
+];
+
+/* ---------- sound ---------- */
+let AC=null, muted=false;
+function ac(){ if(!AC){const C=window.AudioContext||window.webkitAudioContext; if(C){try{AC=new C();}catch(e){}}} if(AC&&AC.state==='suspended')AC.resume(); return AC;}
+function tone(f,t0,d,type='sine',v=.14){const a=ac(); if(!a||muted)return; const o=a.createOscillator(),g=a.createGain(); o.type=type;o.frequency.value=f;
+  const t=a.currentTime+t0; g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v,t+.01); g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+d+.03);}
+const SFX={
+  click:()=>tone(660,0,.07,'triangle',.1),
+  pick:()=>{tone(520,0,.07,'square',.06);tone(780,.06,.09,'square',.06)},
+  draw:()=>{tone(400,0,.08,'sine');tone(600,.07,.1,'sine')},
+  good:()=>[523,659,784,1046].forEach((f,i)=>tone(f,i*.1,.22,'triangle',.16)),
+  ok:()=>{tone(523,0,.18,'triangle');tone(659,.15,.25,'triangle')},
+  bad:()=>{tone(220,0,.22,'sawtooth',.1);tone(160,.2,.3,'sawtooth',.1)},
+  fan:()=>[523,659,784,1046,784,1046,1318].forEach((f,i)=>tone(f,i*.12,.25,'triangle',.16))
+};
+function speak(t){ if(muted||!('speechSynthesis' in window))return; try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=.95;speechSynthesis.speak(u);}catch(e){} }
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove('show'),1900);}
+
+/* ---------- drawing the scene ---------- */
+function objSVG(o){
+  switch(o){
+    case 'book':return '<rect x="280" y="188" width="80" height="44" rx="4" fill="#ff8fab" stroke="#c9184a" stroke-width="3"/><rect x="280" y="188" width="12" height="44" fill="#c9184a"/><line x1="302" y1="200" x2="348" y2="200" stroke="#fff" stroke-width="3"/><line x1="302" y1="212" x2="340" y2="212" stroke="#fff" stroke-width="3"/>';
+    case 'box':return '<rect x="286" y="176" width="68" height="68" rx="6" fill="#ffd166" stroke="#e09f1f" stroke-width="3"/><line x1="286" y1="176" x2="354" y2="244" stroke="#e09f1f" stroke-width="3"/><line x1="354" y1="176" x2="286" y2="244" stroke="#e09f1f" stroke-width="3"/>';
+    case 'crate':return '<rect x="286" y="176" width="68" height="68" rx="4" fill="#e9a15f" stroke="#8a5a2b" stroke-width="3"/><line x1="286" y1="199" x2="354" y2="199" stroke="#8a5a2b" stroke-width="3"/><line x1="286" y1="221" x2="354" y2="221" stroke="#8a5a2b" stroke-width="3"/>';
+    case 'ball':return '<circle cx="320" cy="210" r="30" fill="#4cc9f0" stroke="#1d7fa3" stroke-width="3"/><circle cx="309" cy="198" r="8" fill="#fff" opacity=".6"/>';
+    case 'lamp':return '<rect x="308" y="176" width="24" height="14" rx="3" fill="#868e96"/><circle cx="320" cy="216" r="27" fill="#ffe066" stroke="#e0a800" stroke-width="3"/><circle cx="310" cy="206" r="7" fill="#fff" opacity=".7"/>';
+    case 'puck':return '<rect x="275" y="195" width="90" height="30" rx="10" fill="#495057" stroke="#212529" stroke-width="3"/>';
+  }return '';
+}
+function layout(list){
+  const gr={};
+  list.forEach(a=>{(gr[a.d]=gr[a.d]||[]).push(a);});
+  Object.keys(gr).forEach(d=>{const g=gr[d];g.sort((a,b)=>ORDER.indexOf(a.k)-ORDER.indexOf(b.k));
+    const gap=(d==='U'||d==='D')?40:28;
+    g.forEach((a,i)=>a.off=(i-(g.length-1)/2)*gap);});
+}
+function arrowSVG(a,o={}){
+  const c=FORCES[a.k].color,v=DIRS[a.d];
+  const sx=CX+(v[1]!==0?a.off:0), sy=CY+(v[0]!==0?a.off:0);
+  const ex=sx+v[0]*a.len, ey=sy+v[1]*a.len;
+  const hl=Math.min(18,a.len-2), hw=11;
+  const bx=ex-v[0]*hl, by=ey-v[1]*hl, p=[-v[1],v[0]];
+  const label=o.val?`${a.k} = ${a.m} N`:a.k;
+  const w=18+label.length*11, h=28;
+  let cx,cy;
+  if(v[0]!==0){cx=ex+v[0]*(w/2+8);cy=ey;}else{cx=ex;cy=ey+v[1]*24;}
+  return `<g opacity="${o.op||1}"><line x1="${sx}" y1="${sy}" x2="${bx}" y2="${by}" stroke="${c}" stroke-width="9" stroke-linecap="round"/>`+
+   `<polygon points="${ex},${ey} ${bx+p[0]*hw},${by+p[1]*hw} ${bx-p[0]*hw},${by-p[1]*hw}" fill="${c}"/>`+
+   `<rect x="${cx-w/2}" y="${cy-h/2}" width="${w}" height="${h}" rx="14" fill="${c}"/>`+
+   `<text x="${cx}" y="${cy+6}" text-anchor="middle" font-size="17" font-weight="800" fill="#fff" font-family="Trebuchet MS,Segoe UI,sans-serif">${label}</text></g>`;
+}
+function sceneSVG(s,arrows,o={}){
+  const {hh,hw}=OBJ[s.obj], surf=CY+hh, top=CY-hh;
+  let g='<rect width="640" height="420" fill="#eaf7ff"/>';
+  if(s.scene==='floor'||s.scene==='ice'){
+    const ice=s.scene==='ice';
+    g+=`<rect x="0" y="${surf}" width="640" height="${420-surf}" fill="${ice?'#bfe9ff':'#a8e6a1'}"/><rect x="0" y="${surf}" width="640" height="8" fill="${ice?'#7cc8f0':'#3aa35a'}"/>`;
+    if(ice)g+=`<path d="M60 ${surf+40} l40 -8 M440 ${surf+70} l60 -10 M200 ${surf+90} l50 -6" stroke="#fff" stroke-width="4" stroke-linecap="round"/>`;
+  }
+  if(s.scene==='table'){
+    g+=`<rect x="130" y="${surf}" width="380" height="20" rx="6" fill="#a96a2c"/><rect x="160" y="${surf+20}" width="26" height="${420-surf-20}" fill="#c98b4a"/><rect x="454" y="${surf+20}" width="26" height="${420-surf-20}" fill="#c98b4a"/>`;
+  }
+  if(s.scene==='ceiling'){
+    g+=`<rect x="0" y="0" width="640" height="28" fill="#b9b4c9"/>`+[...Array(16)].map((_,i)=>`<line x1="${i*44}" y1="28" x2="${i*44+20}" y2="2" stroke="#8e88a3" stroke-width="3"/>`).join('');
+  }
+  if(s.scene==='air'){
+    g+=`<path d="M300 40 v28 M320 20 v40 M340 44 v24" stroke="#9db4d6" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 10"/>`;
+  }
+  g+=`<line x1="24" y1="${CY}" x2="616" y2="${CY}" stroke="#7d8bb8" stroke-width="2" stroke-dasharray="7 7"/><line x1="${CX}" y1="${s.scene==='ceiling'?34:12}" x2="${CX}" y2="408" stroke="#7d8bb8" stroke-width="2" stroke-dasharray="7 7"/>`+
+     `<text x="614" y="${CY-8}" text-anchor="end" font-size="16" font-weight="800" fill="#5c6aa0">+x</text><text x="${CX+8}" y="${s.scene==='ceiling'?50:24}" font-size="16" font-weight="800" fill="#5c6aa0">+y</text>`;
+  if(s.scene==='ceiling')g+=`<line x1="${CX}" y1="28" x2="${CX}" y2="${top}" stroke="#7a5230" stroke-width="5"/>`;
+  if(s.scene==='rope')g+=`<line x1="${CX}" y1="0" x2="${CX}" y2="${top}" stroke="#7a5230" stroke-width="5" stroke-dasharray="14 3"/>`;
+  if(s.rope==='L')g+=`<line x1="0" y1="${CY}" x2="${CX-hw}" y2="${CY}" stroke="#7a5230" stroke-width="6"/>`;
+  if(s.rope==='R')g+=`<line x1="${CX+hw}" y1="${CY}" x2="640" y2="${CY}" stroke="#7a5230" stroke-width="6"/>`;
+  g+=objSVG(s.obj);
+  const list=arrows.map(a=>({...a}));
+  layout(list);
+  list.forEach(a=>{g+=arrowSVG(a,o);});
+  g+=`<circle cx="${CX}" cy="${CY}" r="5" fill="#1d2340" stroke="#fff" stroke-width="2"/>`;
+  g+=`<rect x="14" y="382" width="108" height="30" rx="10" fill="#fff" opacity=".9"/><line x1="24" y1="397" x2="54" y2="397" stroke="#1d2340" stroke-width="4"/><line x1="24" y1="391" x2="24" y2="403" stroke="#1d2340" stroke-width="3"/><line x1="54" y1="391" x2="54" y2="403" stroke="#1d2340" stroke-width="3"/><text x="62" y="402" font-size="14" font-weight="800" fill="#1d2340">= 10 N</text>`;
+  return g;
+}
+
+/* ---------- state ---------- */
+const st={name:'',part:1,i:0,items1:[],items2:[],res1:[],res2:[],phase:'answer',drawn:{},hist:[],sel:null,preview:null,dragging:false};
+const svg=$('#svg');
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const sum=a=>a.reduce((x,r)=>x+r.pts,0);
+function show(id){document.querySelectorAll('.screen').forEach(e=>e.hidden=(e.id!==id));window.scrollTo({top:0,behavior:'smooth'});}
+function chips(){const a=sum(st.res1),b=sum(st.res2);$('#chip1').textContent=`Part 1: ${a}/10`;$('#chip2').textContent=`Part 2: ${b}/20`;$('#chipT').textContent=`Total: ${a+b}/30`;}
+function drawing(){return st.part===1&&st.phase==='answer'&&!$('#play').hidden;}
+
+/* ---------- flow ---------- */
+function startGame(){
+  st.name=($('#nameIn').value||'').trim()||'Explorer';
+  st.items1=shuffle(SC).slice(0,5);
+  const pairs=[];SC.forEach(s=>{if(s.eq)Object.keys(s.eq).forEach(ax=>pairs.push({s,axis:ax}));});
+  st.items2=shuffle(pairs).slice(0,10);
+  st.res1=[];st.res2=[];st.part=1;st.i=0;chips();show('play');loadQ();
+}
+function loadQ(){
+  st.phase='answer';st.drawn={};st.hist=[];st.sel=null;st.preview=null;st.dragging=false;
+  $('#fb').hidden=true;$('#checkBtn').hidden=false;$('#nextBtn').hidden=true;
+  const total=st.part===1?5:10, n=st.i+1;
+  $('#barFill').style.width=((n-1)/total*100)+'%';
+  $('#qLabel').textContent=`Part ${st.part} · Question ${n} of ${total}`;
+  if(st.part===1){
+    const s=st.items1[st.i];
+    $('#qText').textContent=s.text;
+    $('#qHelp').textContent='Draw the free-body diagram: show every force acting on the object. Longer arrow = bigger force.';
+    $('#p1tools').hidden=false;$('#p2tools').hidden=true;$('#p1tools').classList.remove('locked');
+    buildPal();render1();
+  }else{
+    const it=st.items2[st.i], s=it.s, ax=it.axis;
+    $('#qText').textContent=s.text;
+    $('#qHelp').textContent=`Write an equation for the forces on the ${ax}-axis (${ax==='x'?'horizontal':'vertical'}). Right (+x) and up (+y) are positive.`;
+    $('#p1tools').hidden=true;$('#p2tools').hidden=false;
+    $('#eqLabel').textContent=`Equation for the ${ax}-axis forces:`;
+    $('#eq').value='';$('#eq').disabled=false;buildTiles();
+    svg.innerHTML=sceneSVG(s,s.f.map(([k,d,m])=>({k,d,m,len:m*PX})),{val:true});
+  }
+}
+function arrowsNow(){
+  const out=[];
+  Object.keys(st.drawn).forEach(k=>{ if(st.preview&&st.preview.k===k)return; out.push({k,...st.drawn[k]}); });
+  if(st.preview&&st.preview.len>=STEP)out.push({...st.preview});
+  return out;
+}
+function render1(){svg.innerHTML=sceneSVG(st.items1[st.i],arrowsNow());updatePal();}
+function buildPal(){
+  const p=$('#pal');p.innerHTML='';
+  ORDER.forEach((k,i)=>{const b=document.createElement('button');b.className='fbtn';b.dataset.k=k;b.style.setProperty('--c',FORCES[k].color);
+    b.innerHTML=`<kbd>${i+1}</kbd><b>${k}</b><small>${FORCES[k].name}</small><span class="ck"></span>`;
+    b.addEventListener('click',()=>select(k));p.appendChild(b);});
+}
+function updatePal(){
+  document.querySelectorAll('.fbtn').forEach(b=>{const k=b.dataset.k;b.classList.toggle('sel',st.sel===k);b.querySelector('.ck').textContent=st.drawn[k]?'✔ '+ARROW[st.drawn[k].d]+' '+(st.drawn[k].len/PX)+' N':'';});
+}
+function select(k){if(!drawing())return;st.sel=k;SFX.pick();updatePal();}
+function pushHist(){st.hist.push(JSON.stringify(st.drawn));}
+function undo(){if(!drawing())return;if(!st.hist.length){toast('Nothing to undo');return;}st.drawn=JSON.parse(st.hist.pop());render1();}
+function removeSel(){if(!drawing())return;if(!st.sel||!st.drawn[st.sel]){toast('Select a force that is drawn first');return;}pushHist();delete st.drawn[st.sel];render1();}
+function clearAll(){if(!drawing())return;if(!Object.keys(st.drawn).length)return;pushHist();st.drawn={};render1();}
+function keyDraw(dir,shrink){
+  if(!st.sel){toast('Pick a force first (keys 1–5)');return;}
+  const cur=st.drawn[st.sel];pushHist();
+  if(cur&&cur.d===dir){cur.len=shrink?cur.len-STEP:Math.min(MAXLEN,cur.len+STEP);if(cur.len<STEP)delete st.drawn[st.sel];}
+  else if(!shrink)st.drawn[st.sel]={d:dir,len:STEP};
+  SFX.draw();render1();
+}
+
+/* pointer drawing (mouse, pen, touch) */
+function svgPt(e){const r=svg.getBoundingClientRect();return{x:(e.clientX-r.left)*640/r.width,y:(e.clientY-r.top)*420/r.height};}
+function updDrag(e){
+  const p=svgPt(e),dx=p.x-CX,dy=p.y-CY;let d,len;
+  if(Math.abs(dx)>=Math.abs(dy)){d=dx>=0?'R':'L';len=Math.abs(dx);}else{d=dy>=0?'D':'U';len=Math.abs(dy);}
+  len=Math.min(MAXLEN,Math.round(len/STEP)*STEP);
+  st.preview={k:st.sel,d,len};render1();
+}
+svg.addEventListener('pointerdown',e=>{
+  if(!drawing())return;e.preventDefault();
+  if(!st.sel){toast('Pick a force first 👇');const pal=$('#pal');pal.classList.remove('shake');void pal.offsetWidth;pal.classList.add('shake');SFX.bad();return;}
+  try{svg.setPointerCapture(e.pointerId);}catch(_){}
+  st.dragging=true;updDrag(e);
+});
+svg.addEventListener('pointermove',e=>{if(st.dragging){e.preventDefault();updDrag(e);}});
+function endDrag(e){
+  if(!st.dragging)return;st.dragging=false;
+  const pv=st.preview;st.preview=null;
+  if(pv&&pv.len>=STEP){pushHist();st.drawn[pv.k]={d:pv.d,len:pv.len};SFX.draw();}
+  render1();
+}
+svg.addEventListener('pointerup',endDrag);
+svg.addEventListener('pointercancel',endDrag);
+svg.addEventListener('contextmenu',e=>e.preventDefault());
+
+/* ---------- Part 1 grading ---------- */
+function grade1(s){
+  const rows=[];let errors=0,lenOk=true;
+  s.f.forEach(([k,d,m])=>{
+    const a=st.drawn[k];
+    if(!a){errors++;rows.push({c:'❌',t:`${k} ${ARROW[d]} ${m} N — missing`});}
+    else if(a.d!==d){errors++;rows.push({c:'❌',t:`${k} should point ${ARROW[d]} (you drew ${ARROW[a.d]})`});}
+    else{const e=m*PX,bad=Math.abs(a.len-e)>Math.max(.3*e,16);if(bad)lenOk=false;
+      rows.push({c:bad?'⚠️':'✅',t:`${k} ${ARROW[d]} ${m} N`+(bad?' — right direction, but the arrow length does not match the scale':'')});}
+  });
+  Object.keys(st.drawn).forEach(k=>{if(!s.f.some(f=>f[0]===k)){errors++;rows.push({c:'❌',t:`${k} is not acting on this object`});}});
+  const pts=errors===0?(lenOk?2:1):(errors===1?1:0);
+  return{pts,rows};
+}
+function check1(){
+  const s=st.items1[st.i];
+  if(!Object.keys(st.drawn).length){toast('Draw at least one force first');return;}
+  const g=grade1(s);
+  st.res1[st.i]={pts:g.pts,title:s.title};st.phase='checked';
+  $('#p1tools').classList.add('locked');
+  const head=g.pts===2?'🌟 Perfect free-body diagram! +2':g.pts===1?'👍 Almost there! +1':'💡 Not quite. +0';
+  const cls=g.pts===2?'':g.pts===1?'mid':'bad';
+  $('#fb').className='card fb '+cls;
+  $('#fb').innerHTML=`<h3>${head}</h3><div class="fbwrap two"><div><ul>${g.rows.map(r=>`<li>${r.c} ${r.t}</li>`).join('')}</ul><p class="help"><b>Why?</b> ${s.why}</p></div>`+
+    `<div><div class="cap">Correct diagram</div><svg viewBox="0 0 640 420">${sceneSVG(s,s.f.map(([k,d,m])=>({k,d,m,len:m*PX})),{val:true})}</svg></div></div>`;
+  $('#fb').hidden=false;$('#checkBtn').hidden=true;$('#nextBtn').hidden=false;
+  $('#nextBtn').textContent=st.i===4?'Finish Part 1 ➜':'Next ➜';
+  (g.pts===2?SFX.good:g.pts===1?SFX.ok:SFX.bad)();chips();
+  $('#fb').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ---------- Part 2 ---------- */
+function buildTiles(){
+  const t=$('#tiles');t.innerHTML='';
+  const add=(txt,cls,fn,col)=>{const b=document.createElement('button');b.textContent=txt;b.className=cls||'';if(col)b.style.background=col;b.addEventListener('click',fn);t.appendChild(b);};
+  ORDER.forEach(k=>add(k,'',()=>ins(k),FORCES[k].color));
+  add('+','op',()=>ins('+'));add('−','op',()=>ins('−'));add('=','op',()=>ins('='));add('0','op',()=>ins('0'));add('ma','op',()=>ins('ma'),'#e64980');
+  add('⌫','ctl',()=>{const e=$('#eq');const v=e.value.trimEnd();const i=v.lastIndexOf(' ');e.value=i<0?'':v.slice(0,i+1);});
+  add('Clear','ctl',()=>{$('#eq').value='';});
+}
+function ins(tok){if(st.phase!=='answer')return;const e=$('#eq');e.value=(e.value.trimEnd()+' '+tok).trim()+' ';}
+const ALIAS={fg:'Fg',w:'Fg',fa:'Fa',ff:'Ff',f:'Ff',n:'N',t:'T',ma:'ma','0':'0'};
+function parseEq(str){
+  const s=str.toLowerCase().replace(/[−–—]/g,'-').replace(/\s+/g,'');
+  const sides=s.split('=');if(sides.length!==2)return null;
+  const map={};
+  for(let i=0;i<2;i++){
+    const t=sides[i];if(!t)return null;const sg=i===0?1:-1;let pos=0;
+    const re=/([+-]?)(ma|fg|fa|ff|w|n|t|f|0)/y;
+    while(pos<t.length){
+      re.lastIndex=pos;const m=re.exec(t);if(!m)return null;
+      if(pos>0&&!m[1])return null;
+      pos=re.lastIndex;const key=ALIAS[m[2]];
+      if(key!=='0')map[key]=(map[key]||0)+(m[1]==='-'?-1:1)*sg;
+    }
+  }
+  Object.keys(map).forEach(k=>{if(map[k]===0)delete map[k];});
+  return map;
+}
+function check2(){
+  const it=st.items2[st.i],s=it.s,exp=s.eq[it.axis],txt=$('#eq').value.trim();
+  if(!txt){toast('Build your equation first');return;}
+  const S=parseEq(txt);
+  if(!S){toast('Write a full equation with one = sign and + or − between terms');return;}
+  const keys=a=>Object.keys(a).sort().join(',');
+  const same=(A,B,f)=>keys(A)===keys(B)&&Object.keys(A).every(k=>A[k]===f*B[k]);
+  let pts=0,msg;
+  if(same(S,exp.m,1)||same(S,exp.m,-1)){pts=2;msg='Your equation is correct!';}
+  else if(keys(S)===keys(exp.m)){pts=1;msg='You used the right quantities, but check the + / − signs and where ma or 0 belongs.';}
+  else{msg='Check which forces act along this axis and whether the object is accelerating.';}
+  st.res2[st.i]={pts,title:`${s.title} (${it.axis}-axis)`};st.phase='checked';$('#eq').disabled=true;
+  const head=pts===2?'🌟 Correct! +2':pts===1?'👍 Close! +1':'💡 Not quite. +0';
+  $('#fb').className='card fb '+(pts===2?'':pts===1?'mid':'bad');
+  $('#fb').innerHTML=`<h3>${head}</h3><p style="margin:4px 0"><b>Your equation:</b> ${txt.replace(/</g,'&lt;')}</p><p style="margin:4px 0"><b>${pts===2?'Standard form':'Correct answer'}:</b> <span style="font-size:22px;font-weight:900">${exp.show}</span></p><p class="help">${msg} ${exp.why}</p>`;
+  $('#fb').hidden=false;$('#checkBtn').hidden=true;$('#nextBtn').hidden=false;
+  $('#nextBtn').textContent=st.i===9?'See my results ➜':'Next ➜';
+  (pts===2?SFX.good:pts===1?SFX.ok:SFX.bad)();chips();
+  $('#fb').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ---------- navigation ---------- */
+function next(){
+  if(st.part===1){
+    if(st.i<4){st.i++;loadQ();}
+    else{$('#p1score').textContent=sum(st.res1)+' / 10';SFX.fan();show('interlude');}
+  }else{
+    if(st.i<9){st.i++;loadQ();}else results();
+  }
+}
+function results(){
+  const a=sum(st.res1),b=sum(st.res2),tot=a+b;
+  $('#resTitle').textContent=`${st.name}, your score:`;
+  $('#resScore').textContent=`${tot} / 30`;
+  $('#resMsg').textContent=`Part 1 (drawing): ${a}/10 · Part 2 (equations): ${b}/20 — `+(tot>=27?'🏆 Force master! Outstanding work!':tot>=21?'🎉 Great job! You really understand forces.':tot>=15?'👍 Good effort! Review the forces you missed and try again.':'💪 Keep practicing — every physicist starts here!');
+  $('#rev').innerHTML=st.res1.map((r,i)=>`<div>🖍 P1·Q${i+1}: ${r.title} — <b>${r.pts}/2</b></div>`).join('')+st.res2.map((r,i)=>`<div>✏️ P2·Q${i+1}: ${r.title} — <b>${r.pts}/2</b></div>`).join('');
+  show('result');chips();
+  if(tot>=21){SFX.fan();confetti();}else SFX.ok();
+}
+function confetti(){
+  const c=$('#confetti'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;c.style.display='block';
+  const P=[...Array(150)].map(()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,r:4+Math.random()*6,vy:2+Math.random()*4,vx:-1+Math.random()*2,col:`hsl(${Math.random()*360} 90% 55%)`,rot:Math.random()*6}));
+  let f=0;(function loop(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.rot+=.1;x.save();x.translate(p.x,p.y);x.rotate(p.rot);x.fillStyle=p.col;x.fillRect(-p.r,-p.r/2,p.r*2,p.r);x.restore();});
+    if(++f<230)requestAnimationFrame(loop);else c.style.display='none';})();
+}
+
+/* ---------- wiring ---------- */
+$('#startBtn').addEventListener('click',startGame);
+$('#nameIn').addEventListener('keydown',e=>{if(e.key==='Enter')startGame();});
+$('#startP2').addEventListener('click',()=>{st.part=2;st.i=0;show('play');loadQ();});
+$('#againBtn').addEventListener('click',startGame);
+$('#checkBtn').addEventListener('click',()=>{st.part===1?check1():check2();});
+$('#nextBtn').addEventListener('click',next);
+$('#undoBtn').addEventListener('click',undo);
+$('#delBtn').addEventListener('click',removeSel);
+$('#clrBtn').addEventListener('click',clearAll);
+$('#speakBtn').addEventListener('click',()=>{speak($('#qText').textContent+'. '+$('#qHelp').textContent);});
+$('#muteBtn').addEventListener('click',()=>{muted=!muted;$('#muteBtn').textContent=muted?'🔇':'🔊';if(muted&&'speechSynthesis' in window)speechSynthesis.cancel();else SFX.click();});
+document.addEventListener('pointerdown',e=>{ac();if(e.target.closest('button')&&e.target.id!=='muteBtn')SFX.click();},true);
+$('#eq').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();if(st.phase==='answer')check2();else next();}});
+document.addEventListener('keydown',e=>{
+  if(e.target&&e.target.tagName==='INPUT')return;
+  if($('#play').hidden)return;
+  if(e.key==='Enter'){e.preventDefault();st.phase==='answer'?(st.part===1?check1():check2()):next();return;}
+  if(!drawing())return;
+  if(/^[1-5]$/.test(e.key)){select(ORDER[+e.key-1]);return;}
+  const map={ArrowUp:'U',ArrowDown:'D',ArrowLeft:'L',ArrowRight:'R'};
+  if(map[e.key]){e.preventDefault();keyDraw(map[e.key],e.shiftKey);}
+  else if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();removeSel();}
+  else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();undo();}
+});
+chips();
+})();
+</script>
+</body>
+</html>
